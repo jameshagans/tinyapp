@@ -47,6 +47,13 @@ app.post("/urls", (req, res) => {
 });
 
 
+app.post('/urls/:id/delete', (req, res) => {
+  const id = req.params.id
+  delete urlDatabase[id];
+  res.redirect('/urls');
+})
+
+
 
 //redirect /u/smallUrls to their long URL value
 app.get("/u/:id", (req, res) => {
