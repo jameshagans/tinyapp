@@ -21,7 +21,7 @@
         <!-- typeof user !== 'undefined'  -->
         
         <%if (user) { %>
-          <p style="margin: 10px; color: rgba(255,255,255,.5);"><%= user.email%></p>
+          <p style="margin: 10px; color: rgba(255,255,255,.5);"> Logged in as: <%= user.email%></p>
           <form action="/logout" method="POST">
           <button type="submit" class="btn btn-primary">Logout</button>
         </form>

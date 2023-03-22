@@ -25,13 +25,13 @@ function generateRandomString() {
 const getUserByEmail = (email) => {
 
   for (let user in users) {
-    if (users[user].email === email ) {
-      return user;
+    if (users[user].email === email) {
+      return users[user];
     }
   }
 
   return null;
-}
+};
 
 
 //needed to parse the body of a post request to be human readable 
@@ -84,7 +84,7 @@ app.get("/urls", (req, res) => {
 
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {user: users[req.cookies.user_id]};
+  const templateVars = { user: users[req.cookies.user_id] };
   res.render("urls_new", templateVars);
 });
 
@@ -115,8 +115,15 @@ app.get("/urls.json", (req, res) => {
 
 app.get('/register', (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
-  res.render('register', templateVars)
-  });
+  res.render('register', templateVars);
+});
+
+
+
+app.get('/login', (req, res) => {
+
+  res.render('login')
+})
 
 
 
@@ -125,7 +132,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[id] = req.body.longURL;
   console.log(`id is: ${id} and url is ${req.body.longURL}`);
   console.log(urlDatabase);
-  res.redirect(`/urls/${id}`); 
+  res.redirect(`/urls/${id}`);
 });
 
 
@@ -136,15 +143,28 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
- 
+  const email = req.body.email;
+  const password = req.body.password
+
+  const user = getUserByEmail(email);
+  
+  if(!user) {
+   return res.status(403).send('User does not exist')
+  }
+
+  if(user.password !== password) {
+    return res.status(403).send('Incorrect Password')
+  }
+
+  res.cookie('user_id', user.id);
   res.redirect('/urls');
 
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie("user_id")
-  res.redirect('/urls')
-})
+  res.clearCookie("user_id");
+  res.redirect('/login');
+});
 
 
 
@@ -156,6 +176,11 @@ app.post("/urls/:id", (req, res) => {
   res.redirect('/urls');
 });
 
+
+
+
+
+
 //registering a new user in the db and asigning cookie
 app.post('/register', (req, res) => {
   // console.log(req.body.email)
@@ -164,31 +189,35 @@ app.post('/register', (req, res) => {
   let password = req.body.password;
 
   //check if empty email or password entered in register form
-  if(!email || !password) {
-    res.status(400).send('Invalid email or Password')
+  if (!email || !password) {
+    res.status(400).send('Invalid email or Password');
   }
 
   // check if user email already exists
 
-  if(getUserByEmail(email)) {
-    res.status(400).send('Email already exists!')
+  if (getUserByEmail(email)) {
+    res.status(400).send('Email already exists!');
   }
 
 
   //assign a randon user id and add user to DB
-  let id = generateRandomString(); 
+  let id = generateRandomString();
   users[id] = {
     id: id,
     email: req.body.email,
     password: req.body.password
-  }
+  };
 
   //add users cookie as user_id
   res.cookie('user_id', id);
 
   console.log(users);
-  res.redirect('/urls')
-})
+  res.redirect('/urls');
+});
+
+
+
+
 
 
 app.listen(PORT, () => {
