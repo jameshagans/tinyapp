@@ -23,6 +23,13 @@
       </div>
       <div class="card-footer text-muted"></div>
     </div>
+
+    <form  style="text-align: center;" action="/urls/<%= id %>" method="POST">
+      <label for="Edit">New URL</label><input id="Edit" name="Edit"  type="text">
+      <button type="submit" class="btn btn-primary">Submit</button>
+
+
+    </form>
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

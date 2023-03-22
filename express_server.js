@@ -35,33 +35,12 @@ app.get("/", (req, res) => {
 });
 
 
-
-
-app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  const id = generateRandomString();
-  urlDatabase[id] = req.body.longURL;
-  console.log(`id is: ${id} and url is ${req.body.longURL}`)
-  console.log(urlDatabase);
-  res.redirect(`/urls/${id}`); // Respond with 'Ok' (we will replace this)
-});
-
-
-app.post('/urls/:id/delete', (req, res) => {
-  const id = req.params.id
-  delete urlDatabase[id];
-  res.redirect('/urls');
-})
-
-
-
 //redirect /u/smallUrls to their long URL value
 app.get("/u/:id", (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id];
   res.redirect(longURL);
 });
-
 
 
 app.get("/urls", (req, res) => {
@@ -90,8 +69,6 @@ app.get("/urls/:id", (req, res) => {
 });
 
 
-
-
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
@@ -110,6 +87,37 @@ app.get("/fetch", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
+
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  const id = generateRandomString();
+  urlDatabase[id] = req.body.longURL;
+  console.log(`id is: ${id} and url is ${req.body.longURL}`);
+  console.log(urlDatabase);
+  res.redirect(`/urls/${id}`); // Respond with 'Ok' (we will replace this)
+});
+
+
+app.post('/urls/:id/delete', (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect('/urls');
+});
+
+
+
+
+
+
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  console.log('shortURL: ', shortURL);
+  urlDatabase[shortURL] = req.body.Edit;
+res.redirect('/urls')
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
