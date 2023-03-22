@@ -1,10 +1,13 @@
 const express = require("express");
+const morgan = require('morgan');
 const app = express(); // Create server connection - initialize app 
 const PORT = 8080; // default port 8080
 
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+app.use(morgan('dev')); //(req,res,next)  
 
+app.set("view engine", "ejs");
 
 
 //generate a random string code for short URLS
@@ -18,10 +21,36 @@ function generateRandomString() {
 }
 
 
-app.set("view engine", "ejs");
+//helper funtion to get users
+const getUserByEmail = (email) => {
 
-//needed to parse the bidy of a post request to be human readable 
+  for (let user in users) {
+    if (users[user].email === email ) {
+      return user;
+    }
+  }
+
+  return null;
+}
+
+
+//needed to parse the body of a post request to be human readable 
 app.use(express.urlencoded({ extended: true }));
+
+//Databases
+
+const users = {
+  user1: {
+    id: "user1",
+    email: "user@a.com",
+    password: "1234",
+  },
+  user2: {
+    id: "user2",
+    email: "user2@a.com",
+    password: "1234k",
+  },
+};
 
 
 const urlDatabase = {
@@ -35,7 +64,7 @@ const urlDatabase = {
 //home page route
 app.get("/", (req, res) => {
   console.log('URLS DB: ', urlDatabase);
-  res.send("Hello!");
+  res.send("This is the home page for TinyApp!!");
 });
 
 
@@ -48,14 +77,14 @@ app.get("/u/:id", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
   res.render("urls_index", templateVars);
 });
 
 
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {username: req.cookies["username"]};
+  const templateVars = {user: users[req.cookies.user_id]};
   res.render("urls_new", templateVars);
 });
 
@@ -69,7 +98,7 @@ app.get("/urls/:id", (req, res) => {
 
   const IDs = req.params.id;
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies.user_id],
     id: IDs, longURL: urlDatabase[IDs]
   };
   console.log("test ", templateVars); // assigned req.params.id to a variable IDs 
@@ -83,12 +112,20 @@ app.get("/urls.json", (req, res) => {
 });
 
 
+
+app.get('/register', (req, res) => {
+  const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
+  res.render('register', templateVars)
+  });
+
+
+
 app.post("/urls", (req, res) => {
   const id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
   console.log(`id is: ${id} and url is ${req.body.longURL}`);
   console.log(urlDatabase);
-  res.redirect(`/urls/${id}`); // Respond with 'Ok' (we will replace this)
+  res.redirect(`/urls/${id}`); 
 });
 
 
@@ -99,15 +136,13 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  console.log('Parsed cookie: ', req.cookies["username"]);
+ 
   res.redirect('/urls');
 
 });
 
 app.post('/logout', (req, res) => {
-  console.log(req.cookies['username'])
-  res.clearCookie("username")
+  res.clearCookie("user_id")
   res.redirect('/urls')
 })
 
@@ -121,6 +156,39 @@ app.post("/urls/:id", (req, res) => {
   res.redirect('/urls');
 });
 
+//registering a new user in the db and asigning cookie
+app.post('/register', (req, res) => {
+  // console.log(req.body.email)
+  // console.log(req.body.password)
+  let email = req.body.email;
+  let password = req.body.password;
+
+  //check if empty email or password entered in register form
+  if(!email || !password) {
+    res.status(400).send('Invalid email or Password')
+  }
+
+  // check if user email already exists
+
+  if(getUserByEmail(email)) {
+    res.status(400).send('Email already exists!')
+  }
+
+
+  //assign a randon user id and add user to DB
+  let id = generateRandomString(); 
+  users[id] = {
+    id: id,
+    email: req.body.email,
+    password: req.body.password
+  }
+
+  //add users cookie as user_id
+  res.cookie('user_id', id);
+
+  console.log(users);
+  res.redirect('/urls')
+})
 
 
 app.listen(PORT, () => {

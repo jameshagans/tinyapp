@@ -16,10 +16,12 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <!-- <p style="margin: 10px;"><%= username %></p> -->
 
-        <%if (username) { %>
-          <p style="margin: 10px;"><%= username %></p>
+
+        <!-- typeof user !== 'undefined'  -->
+        
+        <%if (user) { %>
+          <p style="margin: 10px; color: rgba(255,255,255,.5);"><%= user.email%></p>
           <form action="/logout" method="POST">
           <button type="submit" class="btn btn-primary">Logout</button>
         </form>
@@ -27,7 +29,7 @@
         <% } else{ %>  
          <form  style="" action="/login" method="POST">
           
-          <input name='username' placeholder="username" type="text">
+          <input name='email' placeholder="email" type="text">
           <button type="submit" class="btn btn-primary">Login-in</button>
 
            <% } %>
