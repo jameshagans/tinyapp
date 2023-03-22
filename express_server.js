@@ -105,6 +105,13 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
+app.post('/login', (req, res) => {
+  res.cookie('username', req.body.username);
+  console.log('cookie', req.body.username)
+  res.redirect('/urls'); 
+
+})
+
 
 
 
