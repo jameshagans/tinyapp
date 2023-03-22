@@ -25,12 +25,12 @@
           <form action="/logout" method="POST">
           <button type="submit" class="btn btn-primary">Logout</button>
         </form>
-
+        
         <% } else{ %>  
-         <form  style="" action="/login" method="POST">
-          
-          <input name='email' placeholder="email" type="text">
-          <button type="submit" class="btn btn-primary">Login-in</button>
+         
+          <a style="margin-left: 20px;" href="/login"><button type="submit" class="btn btn-primary">Login</button></a>
+          <a style="margin-left: 20px;" href="/register"><button type="submit" class="btn btn-primary">Register</button></a>
+
 
            <% } %>
 
