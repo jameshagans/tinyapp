@@ -22,39 +22,31 @@ function generateRandomString() {
 }
 
 
-//helper funtion to get users
+//helper funtion to get a users object with an email
 const getUserByEmail = (email) => {
-
   for (let user in users) {
     if (users[user].email === email) {
       return users[user];
     }
   }
-
   return null;
 };
 
-//helper function to get urls for specific user
+//helper function to get stored urls for specific user
 const urlsForUser = function(id) {
   const newObj = {};
-
   for (let key in urlDatabase) {
     if (urlDatabase[key].userID === id) {
       newObj[key] = {
         longURL: urlDatabase[key].longURL
       };
     }
-
   }
   return newObj;
 };
 
 
-//needed to parse the body of a post request to be human readable 
-app.use(express.urlencoded({ extended: true }));
-
 //Databases
-
 const users = {
   user1: {
     id: "user1",
@@ -160,13 +152,6 @@ app.get("/urls/:id", (req, res) => {
 });
 
 
-
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-
-
 app.get('/register', (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
 
@@ -174,8 +159,6 @@ app.get('/register', (req, res) => {
   if (req.cookies.user_id) {
     return res.redirect('/urls');
   }
-
-
   res.render('register', templateVars);
 });
 
@@ -213,7 +196,7 @@ app.post("/urls", (req, res) => {
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
 
-  if(!urlDatabase[id]){
+  if (!urlDatabase[id]) {
     res.status(400).send('The requested URL does not exist.');
   }
 
@@ -233,7 +216,7 @@ app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const userId = req.cookies.user_id;
 
-  if(!urlDatabase[shortURL]){
+  if (!urlDatabase[shortURL]) {
     res.status(400).send('The requested URL does not exist.');
   }
 
@@ -241,7 +224,7 @@ app.post("/urls/:id", (req, res) => {
 
     return res.status(401).send('You do not have access to this URL.');
   }
-  
+
   console.log('shortURL: ', shortURL);
   urlDatabase[shortURL] = req.body.Edit;
   res.redirect('/urls');
@@ -253,12 +236,12 @@ app.post('/login', (req, res) => {
   const password = req.body.password;
 
   const user = getUserByEmail(email);
- 
+
   if (!user) {
     return res.status(403).send('User does not exist');
   }
 
-  if (!bcrypt.compareSync(password, user.password)){
+  if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send('Incorrect Password');
   }
 
@@ -271,12 +254,6 @@ app.post('/logout', (req, res) => {
   res.clearCookie("user_id");
   res.redirect('/login');
 });
-
-
-
-
-
-
 
 
 //registering a new user in the db and asigning cookie
@@ -313,10 +290,6 @@ app.post('/register', (req, res) => {
   console.log(users);
   res.redirect('/urls');
 });
-
-
-
-
 
 
 app.listen(PORT, () => {
