@@ -5,15 +5,13 @@ const app = express(); // Create server connection - initialize app
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const helpers = require('./helpers');
-
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
   keys: ['secret'],
 }));
 app.use(morgan('dev')); //(req,res,next)  
-app.use(bodyParser.urlencoded({ extended: true }))
-
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
 
@@ -66,9 +64,8 @@ const urlDatabase = {
     longURL: "http://www.google.com",
     userID: "user2"
   }
-  // "xyz": "https://www.microsoft.com"
 };
-// urlDatabase["xyz"] => "https://www.microsoft.com"
+
 
 
 //home page route
@@ -89,11 +86,9 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
-    return res.status(401).send('You must Register or Login before you can view URLs');
+    return res.status(401).send("You Must Register or Login Before You Can View URLs " + "Login or Register <a href=/login>Here!</a");
   };
-
   const usersURLS = urlsForUser(userID);
-
 
   const templateVars = { urls: usersURLS, user: users[req.session.user_id] };
   res.render("urls_index", templateVars);
@@ -104,16 +99,10 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: users[req.session.user_id] };
   const cookies = req.session;
-
-  // if(Object.keys(cookies).length === 0) {
-  //   return res.render('login');
-  // }
-
   if (!cookies.user_id) {
     return res.render('login');
   }
   res.render("urls_new", templateVars);
-
 });
 
 
@@ -122,8 +111,6 @@ app.get("/urls/new", (req, res) => {
 // //http://localhost:3000/test/rohit/manager => req.params.name | req.params.job
 
 app.get("/urls/:id", (req, res) => {
-  //http://localhost:3000   /urls/x26dh => req.params.id
-
   const IDs = req.params.id;
   const userId = req.session.user_id;
 
@@ -137,7 +124,6 @@ app.get("/urls/:id", (req, res) => {
 
     res.send('You do not have access to this URL.');
   }
-
 
   const templateVars = {
     user: users[req.session.user_id],
@@ -161,12 +147,10 @@ app.get('/register', (req, res) => {
 
 
 app.get('/login', (req, res) => {
-
   //if already logged in - redirect to urls 
   if (req.session.user_id) {
     return res.redirect('/urls');
   }
-
 
   res.render('login');
 });
@@ -193,7 +177,7 @@ app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
 
   if (!urlDatabase[id]) {
-   return res.status(400).send('The requested URL does not exist.');
+    return res.status(400).send('The requested URL does not exist.');
   }
 
   const userId = req.session.user_id;
@@ -213,7 +197,7 @@ app.post("/urls/:id", (req, res) => {
   const userId = req.session.user_id;
 
   if (!urlDatabase[shortURL]) {
-   return res.status(400).send('The requested URL does not exist.');
+    return res.status(400).send('The requested URL does not exist.');
   }
 
   if (urlDatabase[shortURL].userID !== userId) {
@@ -255,10 +239,10 @@ app.post('/logout', (req, res) => {
 
 //registering a new user in the db and asigning cookie
 app.post('/register', (req, res) => {
-  console.log('REQ: ', req.body)
+  console.log('REQ: ', req.body);
   let email = req.body.email;
   let password = req.body.password;
-  const salt =  bcrypt.genSaltSync(10);
+  const salt = bcrypt.genSaltSync(10);
   const hashedPassword = bcrypt.hashSync(password, salt);
 
   //check if empty email or password entered in register form
