@@ -85,7 +85,17 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: users[req.cookies.user_id] };
+  const cookies = req.cookies;
+
+  // if(Object.keys(cookies).length === 0) {
+  //   return res.render('login');
+  // }
+  
+  if(!cookies.user_id) {
+    return res.render('login');
+  }
   res.render("urls_new", templateVars);
+  
 });
 
 
@@ -97,11 +107,18 @@ app.get("/urls/:id", (req, res) => {
   //http://localhost:3000   /urls/x26dh => req.params.id
 
   const IDs = req.params.id;
+
+ // check if param id matches a shortURL in the db
+  if(!urlDatabase[IDs]) {
+   return res.send('The selected short URL does not exist')
+  }
+
+
   const templateVars = {
     user: users[req.cookies.user_id],
     id: IDs, longURL: urlDatabase[IDs]
   };
-  console.log("test ", templateVars); // assigned req.params.id to a variable IDs 
+  console.log("templateVars: ", templateVars); // assigned req.params.id to a variable IDs 
   res.render("urls_show", templateVars);
 });
 
@@ -115,6 +132,13 @@ app.get("/urls.json", (req, res) => {
 
 app.get('/register', (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
+
+  //if already logged in - redirect to urls 
+  if(req.cookies.user_id) {
+   return res.redirect('/urls')
+  }
+
+
   res.render('register', templateVars);
 });
 
@@ -122,12 +146,22 @@ app.get('/register', (req, res) => {
 
 app.get('/login', (req, res) => {
 
+    //if already logged in - redirect to urls 
+    if(req.cookies.user_id) {
+      return res.redirect('/urls')
+    }
+  
+
   res.render('login')
 })
 
 
 
 app.post("/urls", (req, res) => {
+if(!req.cookies.user_id) {
+   return res.send('You must log in before addding a URL')
+}
+
   const id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
   console.log(`id is: ${id} and url is ${req.body.longURL}`);
@@ -190,13 +224,13 @@ app.post('/register', (req, res) => {
 
   //check if empty email or password entered in register form
   if (!email || !password) {
-    res.status(400).send('Invalid email or Password');
+   return res.status(400).send('Invalid email or Password');
   }
 
   // check if user email already exists
 
   if (getUserByEmail(email)) {
-    res.status(400).send('Email already exists!');
+    return res.status(400).send('Email already exists!');
   }
 
 
