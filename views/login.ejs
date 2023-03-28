@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Page</title>
 </head>
+
 <body>
   <h1 style="text-align: center; background-color: lightgreen;">Login Form</h1>
-  
- <form style="text-align: center;" action="/login" method="POST">
 
-  <label for="email"><strong>Email Address:</strong></label>
-  <input type="email" name="email">
-  <label for="password"><strong>Password:</strong></label>
-  <input type="password" name="password">
+  <form style="text-align: center;" action="/login" method="POST">
 
-  <button type="submit" class="btn btn-primary">Submit</button>
+    <label for="email"><strong>Email Address:</strong></label>
+    <input type="email" name="email">
+    <label for="password"><strong>Password:</strong></label>
+    <input type="password" name="password">
+
+    <button type="submit" class="btn btn-primary">Submit</button>
 
 
- </form>
-<div style="text-align: center;">
-  <p>Dont have an account yet? Register here: </p>
- <a style="margin-left: 20px;" href="/register"><button type="submit" class="btn btn-primary">Register</button></a>
+  </form>
+  <div style="text-align: center;">
+    <p>Dont have an account yet? Register here: </p>
+    <a style="margin-left: 20px;" href="/register"><button type="submit" class="btn btn-primary">Register</button></a>
 
-</div>
+  </div>
 
 </body>
+
 </html>

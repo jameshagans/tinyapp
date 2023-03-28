@@ -5,6 +5,7 @@ const app = express(); // Create server connection - initialize app
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const helpers = require('./helpers');
+const {urlDatabase, users} = require('./database');
 const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
@@ -15,62 +16,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
 
-//generate a random string code for short URLS
-function generateRandomString() {
-  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return result;
-}
-
-
-//helper function to get stored urls for specific user
-const urlsForUser = function(id) {
-  const newObj = {};
-  for (let key in urlDatabase) {
-    if (urlDatabase[key].userID === id) {
-      newObj[key] = {
-        longURL: urlDatabase[key].longURL
-      };
-    }
-  }
-  return newObj;
-};
-
-
-//Databases
-const users = {
-  user1: {
-    id: "user1",
-    email: "user@a.com",
-    password: "$2a$10$4.4rnNVIzEqOj/DtCkhZxuPFozIOElhcejYRjFi11UpKJuW6SngfK", // 1234 for tester
-  },
-  user2: {
-    id: "user2",
-    email: "user2@a.com",
-    password: "$2a$10$4.4rnNVIzEqOj/DtCkhZxuPFozIOElhcejYRjFi11UpKJuW6SngfK", // 1234 for tester
-  },
-};
-
-
-const urlDatabase = {
-  "b2xVn2": {
-    longURL: "http://www.lighthouselabs.ca",
-    userID: 'user1'
-  },
-  "9sm5xK": {
-    longURL: "http://www.google.com",
-    userID: "user2"
-  }
-};
-
 
 
 //home page route
 app.get("/", (req, res) => {
-  console.log('URLS DB: ', urlDatabase);
   res.send("This is the home page for TinyApp!! " + "Login or Register <a href=/login>Here!</a");
 });
 
@@ -88,7 +37,7 @@ app.get("/urls", (req, res) => {
   if (!userID) {
     return res.status(401).send("You Must Register or Login Before You Can View URLs " + "Login or Register <a href=/login>Here!</a");
   };
-  const usersURLS = urlsForUser(userID);
+  const usersURLS = helpers.urlsForUser(userID);
 
   const templateVars = { urls: usersURLS, user: users[req.session.user_id] };
   res.render("urls_index", templateVars);
@@ -162,17 +111,18 @@ app.post("/urls", (req, res) => {
     return res.send('You must log in before addding a URL');
   }
 
-  const id = generateRandomString();
+  if(!req.body.longURL) {
+    res.status(406).send('You must sumbit a valid URL. ' + 'Please try again <a href="/urls/new">here</a>')
+  }
+  const id = helpers.generateRandomString();
   urlDatabase[id] = {};
   urlDatabase[id].longURL = req.body.longURL;
   urlDatabase[id].userID = req.session.user_id;
-  console.log(`id is: ${id} and url is ${req.body.longURL}`);
-  console.log(urlDatabase);
   res.redirect(`/urls/${id}`);
 });
 
 
-//submitted from the detel button on myURLs page
+//submitted from the delete button on myURLs page
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
 
@@ -196,6 +146,10 @@ app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const userId = req.session.user_id;
 
+   if(!req.body.Edit) {
+    res.status(406).send('You must sumbit a valid URL. ' + 'Please try again <a href="/urls">here</a>')
+  }
+
   if (!urlDatabase[shortURL]) {
     return res.status(400).send('The requested URL does not exist.');
   }
@@ -206,7 +160,7 @@ app.post("/urls/:id", (req, res) => {
   }
 
   console.log('shortURL: ', shortURL);
-  urlDatabase[shortURL] = req.body.Edit;
+  urlDatabase[shortURL].longURL = req.body.Edit;
   res.redirect('/urls');
 });
 
@@ -218,7 +172,7 @@ app.post('/login', (req, res) => {
   const user = helpers.getUserByEmail(email, users);
 
   if (!user) {
-    return res.status(403).send('Email does not exist.\n' + 'Please try again with a valide email <a href="/login">Login Page</a>');
+    return res.status(403).send('Email does not exist.\n' + 'Please try again with a valid email <a href="/login">Login Page</a>');
   }
 
   if (!bcrypt.compareSync(password, user.password)) {
@@ -258,7 +212,7 @@ app.post('/register', (req, res) => {
 
 
   //assign a random user id and add user to DB
-  let id = generateRandomString();
+  let id = helpers.generateRandomString();
   users[id] = {
     id: id,
     email: req.body.email,
@@ -267,8 +221,6 @@ app.post('/register', (req, res) => {
 
   //add users cookie as user_id
   req.session.user_id = id;
-
-  console.log(users);
   res.redirect('/urls');
 });
 
